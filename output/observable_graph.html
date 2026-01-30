@@ -1,0 +1,164 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #1a1a2e;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#4CAF50", "font": {"color": "white"}, "id": "lsass.exe", "label": "lsass.exe", "shape": "dot", "size": 20, "title": "Process: lsass.exe\nPath: C:\\WINDOWS\\system32\\lsass.exe\nPIDs: 1724\nOperations: 53"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "NGenuity2Helper.exe", "label": "NGenuity2Helper.exe", "shape": "dot", "size": 21, "title": "Process: NGenuity2Helper.exe\nPath: C:\\Program Files\\WindowsApps\\33C30B79.HyperXNGenuity_5.35.0.0_x64__0a78dr3hq0pvt\\Assets\\Native\\NGenuity2Helper.exe\nPIDs: 18612\nOperations: 184"}, {"color": "#f44336", "font": {"color": "white"}, "id": "Code.exe", "label": "Code.exe", "shape": "dot", "size": 30, "title": "Process: Code.exe\nPath: C:\\Users\\adria\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe\nPIDs: 24868, 36364, 19260, 25072, 28412\nOperations: 1031"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "Idle", "label": "Idle", "shape": "dot", "size": 20, "title": "Process: Idle\nPath: Idle\nPIDs: 0\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "System", "label": "System", "shape": "dot", "size": 20, "title": "Process: System\nPath: System\nPIDs: 4\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "Secure System", "label": "Secure System", "shape": "dot", "size": 20, "title": "Process: Secure System\nPath: Secure System\nPIDs: 188\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "Registry", "label": "Registry", "shape": "dot", "size": 20, "title": "Process: Registry\nPath: Registry\nPIDs: 232\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "smss.exe", "label": "smss.exe", "shape": "dot", "size": 20, "title": "Process: smss.exe\nPath: C:\\WINDOWS\\System32\\smss.exe\nPIDs: 560\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "csrss.exe", "label": "csrss.exe", "shape": "dot", "size": 20, "title": "Process: csrss.exe\nPath: C:\\WINDOWS\\system32\\csrss.exe\nPIDs: 1560, 1460\nOperations: 83"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "wininit.exe", "label": "wininit.exe", "shape": "dot", "size": 20, "title": "Process: wininit.exe\nPath: C:\\WINDOWS\\system32\\wininit.exe\nPIDs: 1552\nOperations: 3"}, {"color": "#f44336", "font": {"color": "white"}, "id": "services.exe", "label": "services.exe", "shape": "dot", "size": 22, "title": "Process: services.exe\nPath: C:\\WINDOWS\\system32\\services.exe\nPIDs: 1636\nOperations: 235"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "winlogon.exe", "label": "winlogon.exe", "shape": "dot", "size": 20, "title": "Process: winlogon.exe\nPath: C:\\WINDOWS\\system32\\winlogon.exe\nPIDs: 1660\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "LsaIso.exe", "label": "LsaIso.exe", "shape": "dot", "size": 20, "title": "Process: LsaIso.exe\nPath: LsaIso.exe\nPIDs: 1708\nOperations: 3"}, {"color": "#f44336", "font": {"color": "white"}, "id": "svchost.exe", "label": "svchost.exe", "shape": "dot", "size": 50, "title": "Process: svchost.exe\nPath: C:\\WINDOWS\\system32\\svchost.exe\nPIDs: 27124, 8452, 8708, 13404, 16220\nOperations: 31926"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "fontdrvhost.exe", "label": "fontdrvhost.exe", "shape": "dot", "size": 20, "title": "Process: fontdrvhost.exe\nPath: C:\\WINDOWS\\system32\\fontdrvhost.exe\nPIDs: 1916, 1908\nOperations: 6"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "dwm.exe", "label": "dwm.exe", "shape": "dot", "size": 20, "title": "Process: dwm.exe\nPath: C:\\WINDOWS\\system32\\dwm.exe\nPIDs: 1424\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "WUDFHost.exe", "label": "WUDFHost.exe", "shape": "dot", "size": 20, "title": "Process: WUDFHost.exe\nPath: C:\\Windows\\System32\\WUDFHost.exe\nPIDs: 3496, 1260, 7548\nOperations: 9"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "UninstallMonitor.exe", "label": "UninstallMonitor.exe", "shape": "dot", "size": 20, "title": "Process: UninstallMonitor.exe\nPath: C:\\Program Files (x86)\\IObit\\IObit Uninstaller\\UninstallMonitor.exe\nPIDs: 33664\nOperations: 76"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "NVDisplay.Container.exe", "label": "NVDisplay.Container.exe", "shape": "dot", "size": 20, "title": "Process: NVDisplay.Container.exe\nPath: C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nv_dispi.inf_amd64_08efa4f6500ab001\\Display.NvContainer\\NVDisplay.Container.exe\nPIDs: 3472, 14092\nOperations: 6"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "MemCompression", "label": "MemCompression", "shape": "dot", "size": 20, "title": "Process: MemCompression\nPath: MemCompression\nPIDs: 3728\nOperations: 3"}, {"color": "#f44336", "font": {"color": "white"}, "id": "wmiprvse.exe", "label": "wmiprvse.exe", "shape": "dot", "size": 50, "title": "Process: wmiprvse.exe\nPath: C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe\nPIDs: 9988, 1088, 4968\nOperations: 3729"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "spoolsv.exe", "label": "spoolsv.exe", "shape": "dot", "size": 20, "title": "Process: spoolsv.exe\nPath: C:\\WINDOWS\\System32\\spoolsv.exe\nPIDs: 5308\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "coreServiceShell.exe", "label": "coreServiceShell.exe", "shape": "dot", "size": 50, "title": "Process: coreServiceShell.exe\nPath: C:\\Program Files\\Trend Micro\\AMSP\\coreServiceShell.exe\nPIDs: 5548\nOperations: 11648"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "conhost.exe", "label": "conhost.exe", "shape": "dot", "size": 20, "title": "Process: conhost.exe\nPath: C:\\WINDOWS\\system32\\conhost.exe\nPIDs: 5936, 9840, 6028, 12760, 36828\nOperations: 45"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "coreFrameworkHost.exe", "label": "coreFrameworkHost.exe", "shape": "dot", "size": 20, "title": "Process: coreFrameworkHost.exe\nPath: C:\\Program Files\\Trend Micro\\AMSP\\coreFrameworkHost.exe\nPIDs: 6020\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "dashost.exe", "label": "dashost.exe", "shape": "dot", "size": 20, "title": "Process: dashost.exe\nPath: C:\\WINDOWS\\system32\\dashost.exe\nPIDs: 6216\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "mDNSResponder.exe", "label": "mDNSResponder.exe", "shape": "dot", "size": 20, "title": "Process: mDNSResponder.exe\nPath: C:\\Program Files\\Bonjour\\mDNSResponder.exe\nPIDs: 6368\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "armsvc.exe", "label": "armsvc.exe", "shape": "dot", "size": 20, "title": "Process: armsvc.exe\nPath: C:\\Program Files (x86)\\Common Files\\Adobe\\ARM\\1.0\\armsvc.exe\nPIDs: 6376\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "remoting_host.exe", "label": "remoting_host.exe", "shape": "dot", "size": 20, "title": "Process: remoting_host.exe\nPath: C:\\Program Files (x86)\\Google\\Chrome Remote Desktop\\143.0.7499.7\\remoting_host.exe\nPIDs: 6392, 7696\nOperations: 6"}, {"color": "#f44336", "font": {"color": "white"}, "id": "CloudEndpointService.exe", "label": "CloudEndpointService.exe", "shape": "dot", "size": 27, "title": "Process: CloudEndpointService.exe\nPath: C:\\Program Files\\Trend Micro\\Cloud Endpoint\\CloudEndpointService.exe\nPIDs: 6448\nOperations: 755"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "OfficeClickToRun.exe", "label": "OfficeClickToRun.exe", "shape": "dot", "size": 20, "title": "Process: OfficeClickToRun.exe\nPath: C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\OfficeClickToRun.exe\nPIDs: 6464\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "ds_monitor.exe", "label": "ds_monitor.exe", "shape": "dot", "size": 20, "title": "Process: ds_monitor.exe\nPath: C:\\Program Files\\Trend Micro\\Deep Security Agent\\ds_monitor.exe\nPIDs: 6472\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "LightKeeperService.exe", "label": "LightKeeperService.exe", "shape": "dot", "size": 20, "title": "Process: LightKeeperService.exe\nPath: C:\\Program Files (x86)\\MSI\\MSI Center\\Mystic Light\\LightKeeperService.exe\nPIDs: 6684\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "Mystic_Light_Service.exe", "label": "Mystic_Light_Service.exe", "shape": "dot", "size": 20, "title": "Process: Mystic_Light_Service.exe\nPath: C:\\Program Files (x86)\\MSI\\MSI Center\\Mystic Light\\Mystic_Light_Service.exe\nPIDs: 6692\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "MSI_Case_Service.exe", "label": "MSI_Case_Service.exe", "shape": "dot", "size": 20, "title": "Process: MSI_Case_Service.exe\nPath: C:\\Program Files (x86)\\MSI\\MSI Center\\Case\\MSI_Case_Service.exe\nPIDs: 6700\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "lghub_updater.exe", "label": "lghub_updater.exe", "shape": "dot", "size": 20, "title": "Process: lghub_updater.exe\nPath: C:\\Program Files\\LGHUB\\lghub_updater.exe\nPIDs: 6712\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "MSI_Central_Service.exe", "label": "MSI_Central_Service.exe", "shape": "dot", "size": 20, "title": "Process: MSI_Central_Service.exe\nPath: C:\\Program Files (x86)\\MSI\\MSI Center\\MSI_Central_Service.exe\nPIDs: 6720\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "PwmSvc.exe", "label": "PwmSvc.exe", "shape": "dot", "size": 20, "title": "Process: PwmSvc.exe\nPath: C:\\Program Files\\Trend Micro\\TMIDS\\PwmSvc.exe\nPIDs: 6816\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "RtkAudUService64.exe", "label": "RtkAudUService64.exe", "shape": "dot", "size": 20, "title": "Process: RtkAudUService64.exe\nPath: C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\realtekservice.inf_amd64_7e93164ae8ff6bf7\\RtkAudUService64.exe\nPIDs: 6824, 22848\nOperations: 6"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "nvcontainer.exe", "label": "nvcontainer.exe", "shape": "dot", "size": 20, "title": "Process: nvcontainer.exe\nPath: C:\\Program Files\\NVIDIA Corporation\\NvContainer\\nvcontainer.exe\nPIDs: 6932, 14960, 14880, 14140\nOperations: 12"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "ss_conn_service2.exe", "label": "ss_conn_service2.exe", "shape": "dot", "size": 20, "title": "Process: ss_conn_service2.exe\nPath: C:\\Program Files\\Samsung\\USB Drivers\\28_ssconn2\\conn\\ss_conn_service2.exe\nPIDs: 7016\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "wslservice.exe", "label": "wslservice.exe", "shape": "dot", "size": 20, "title": "Process: wslservice.exe\nPath: C:\\Program Files\\WSL\\wslservice.exe\nPIDs: 7024\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "ss_conn_service.exe", "label": "ss_conn_service.exe", "shape": "dot", "size": 20, "title": "Process: ss_conn_service.exe\nPath: C:\\Program Files\\Samsung\\USB Drivers\\27_ssconn\\conn\\ss_conn_service.exe\nPIDs: 7032\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "wallpaperservice32.exe", "label": "wallpaperservice32.exe", "shape": "dot", "size": 20, "title": "Process: wallpaperservice32.exe\nPath: C:\\WINDOWS\\SysWOW64\\wallpaperservice32.exe\nPIDs: 7044\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "sqlwriter.exe", "label": "sqlwriter.exe", "shape": "dot", "size": 20, "title": "Process: sqlwriter.exe\nPath: C:\\Program Files\\Microsoft SQL Server\\90\\Shared\\sqlwriter.exe\nPIDs: 7052\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "SearchIndexer.exe", "label": "SearchIndexer.exe", "shape": "dot", "size": 20, "title": "Process: SearchIndexer.exe\nPath: C:\\WINDOWS\\system32\\SearchIndexer.exe\nPIDs: 7076\nOperations: 14"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "EndpointBasecamp.exe", "label": "EndpointBasecamp.exe", "shape": "dot", "size": 20, "title": "Process: EndpointBasecamp.exe\nPath: C:\\Program Files (x86)\\Trend Micro\\Endpoint Basecamp\\EndpointBasecamp.exe\nPIDs: 9816, 7164, 17292, 11844, 10276\nOperations: 16"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "spacedeskService.exe", "label": "spacedeskService.exe", "shape": "dot", "size": 20, "title": "Process: spacedeskService.exe\nPath: C:\\WINDOWS\\System32\\spacedeskService.exe\nPIDs: 7176\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "sqlservr.exe", "label": "sqlservr.exe", "shape": "dot", "size": 20, "title": "Process: sqlservr.exe\nPath: C:\\Program Files (x86)\\Microsoft SQL Server\\MSSQL11.ADK\\MSSQL\\Binn\\sqlservr.exe\nPIDs: 7356\nOperations: 3"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "dsa.exe", "label": "dsa.exe", "shape": "dot", "size": 23, "title": "Process: dsa.exe\nPath: C:\\Program Files\\Trend Micro\\Deep Security Agent\\dsa.exe\nPIDs: 8012\nOperations: 385"}, {"color": "#e91e63", "font": {"color": "white"}, "id": "T1547", "label": "T1547", "shape": "triangle", "size": 15, "title": "Process has unusually high registry activity (396 operations)"}]);
+                  edges = new vis.DataSet([{"from": "dsa.exe", "title": "Operations: 96", "to": "svchost.exe", "value": 10}, {"from": "dsa.exe", "title": "Operations: 15", "to": "conhost.exe", "value": 10}, {"from": "coreServiceShell.exe", "title": "Operations: 15", "to": "Code.exe", "value": 10}, {"from": "svchost.exe", "title": "Operations: 14", "to": "System", "value": 10}, {"from": "wmiprvse.exe", "title": "Operations: 14", "to": "wmiprvse.exe", "value": 10}, {"from": "NGenuity2Helper.exe", "title": "Operations: 12", "to": "Code.exe", "value": 10}, {"from": "dsa.exe", "title": "Operations: 12", "to": "Code.exe", "value": 10}, {"from": "NGenuity2Helper.exe", "title": "Operations: 8", "to": "svchost.exe", "value": 8}, {"from": "UninstallMonitor.exe", "title": "Operations: 8", "to": "svchost.exe", "value": 8}, {"from": "lsass.exe", "title": "Operations: 6", "to": "dsa.exe", "value": 6}, {"from": "dsa.exe", "title": "Operations: 5", "to": "EndpointBasecamp.exe", "value": 5}, {"from": "dsa.exe", "title": "Operations: 4", "to": "NVDisplay.Container.exe", "value": 4}, {"from": "dsa.exe", "title": "Operations: 4", "to": "RtkAudUService64.exe", "value": 4}, {"from": "dsa.exe", "title": "Operations: 4", "to": "nvcontainer.exe", "value": 4}, {"from": "NGenuity2Helper.exe", "title": "Operations: 3", "to": "conhost.exe", "value": 3}, {"from": "dsa.exe", "title": "Operations: 3", "to": "WUDFHost.exe", "value": 3}, {"from": "svchost.exe", "title": "Operations: 3", "to": "wmiprvse.exe", "value": 3}, {"from": "NGenuity2Helper.exe", "title": "Operations: 2", "to": "RtkAudUService64.exe", "value": 2}, {"from": "NGenuity2Helper.exe", "title": "Operations: 2", "to": "nvcontainer.exe", "value": 2}, {"from": "NGenuity2Helper.exe", "title": "Operations: 2", "to": "NGenuity2Helper.exe", "value": 2}, {"from": "dsa.exe", "title": "Operations: 2", "to": "fontdrvhost.exe", "value": 2}, {"from": "dsa.exe", "title": "Operations: 2", "to": "remoting_host.exe", "value": 2}, {"from": "dsa.exe", "title": "Operations: 2", "to": "dsa.exe", "value": 2}, {"from": "dsa.exe", "title": "Operations: 2", "to": "NGenuity2Helper.exe", "value": 2}, {"from": "lsass.exe", "title": "Operations: 2", "to": "CloudEndpointService.exe", "value": 2}, {"from": "NGenuity2Helper.exe", "title": "Operations: 1", "to": "UninstallMonitor.exe", "value": 1}, {"from": "NGenuity2Helper.exe", "title": "Operations: 1", "to": "remoting_host.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "winlogon.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "LsaIso.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "dwm.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "spoolsv.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "coreServiceShell.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "coreFrameworkHost.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "mDNSResponder.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "armsvc.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "CloudEndpointService.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "OfficeClickToRun.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "ds_monitor.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "LightKeeperService.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "Mystic_Light_Service.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "MSI_Case_Service.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "lghub_updater.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "MSI_Central_Service.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "PwmSvc.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "ss_conn_service2.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "wslservice.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "ss_conn_service.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "wallpaperservice32.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "sqlwriter.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "SearchIndexer.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "spacedeskService.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "sqlservr.exe", "value": 1}, {"from": "dsa.exe", "title": "Operations: 1", "to": "UninstallMonitor.exe", "value": 1}, {"color": "#e91e63", "dashes": true, "from": "Code.exe", "to": "T1547"}, {"color": "#e91e63", "dashes": true, "from": "services.exe", "to": "T1547"}, {"color": "#e91e63", "dashes": true, "from": "svchost.exe", "to": "T1547"}, {"color": "#e91e63", "dashes": true, "from": "wmiprvse.exe", "to": "T1547"}, {"color": "#e91e63", "dashes": true, "from": "CloudEndpointService.exe", "to": "T1547"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "forceAtlas2Based": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.01,
+            "damping": 0.4,
+            "gravitationalConstant": -50,
+            "springConstant": 0.08,
+            "springLength": 100
+        },
+        "solver": "forceAtlas2Based",
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

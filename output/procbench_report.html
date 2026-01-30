@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProcBench Analysis Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --border-color: #30363d;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header - Workbench Style */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Score Badge - Like Workbench */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--accent-red), #ff6b6b);
+            color: white;
+        }
+        
+        .score-badge.medium {
+            background: linear-gradient(135deg, var(--accent-orange), #ffd93d);
+        }
+        
+        .score-badge.low {
+            background: linear-gradient(135deg, var(--accent-green), #6bcb77);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+        
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .stat-card.danger .value { color: var(--accent-red); }
+        .stat-card.warning .value { color: var(--accent-orange); }
+        .stat-card.success .value { color: var(--accent-green); }
+        
+        /* Sections */
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        /* Anomaly Cards - Like Workbench Highlights */
+        .anomaly-card {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .anomaly-card.medium { border-left-color: var(--accent-orange); }
+        
+        .anomaly-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .anomaly-type {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .severity-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .severity-badge.high {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--accent-red);
+        }
+        
+        .severity-badge.medium {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--accent-orange);
+        }
+        
+        .mitre-tag {
+            display: inline-block;
+            background: rgba(163, 113, 247, 0.2);
+            color: var(--accent-purple);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        /* Process Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--bg-card);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        
+        tr:hover {
+            background: rgba(88, 166, 255, 0.1);
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            border: 2px solid var(--bg-primary);
+        }
+        
+        .timeline-item.anomaly::before {
+            background: var(--accent-red);
+        }
+        
+        /* Graph Container */
+        .graph-container {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        /* Mermaid Diagrams */
+        .mermaid {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span class="score-badge medium">
+                    12
+                </span>
+                ProcBench Analysis Report
+            </h1>
+            <div class="subtitle">
+                Process Monitor Log Analysis | Generated: 2026-01-31 03:21:40
+            </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value">53,429</div>
+                <div class="label">Total Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">132</div>
+                <div class="label">Unique Processes</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="value">0</div>
+                <div class="label">High Severity</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="value">12</div>
+                <div class="label">Medium Severity</div>
+            </div>
+        </div>
+        
+        <!-- Anomalies Section (Highlights) -->
+        <div class="section">
+            <div class="section-header">
+                🚨 Highlights - Detected Anomalies
+            </div>
+            <div class="section-content">
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> Code.exe<br>
+                        <strong>Path:</strong> C:\Users\adria\AppData\Local\Programs\Microsoft VS Code\Code.exe<br>
+                        Process has unusually high registry activity (396 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> services.exe<br>
+                        <strong>Path:</strong> C:\WINDOWS\system32\services.exe<br>
+                        Process has unusually high registry activity (232 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> svchost.exe<br>
+                        <strong>Path:</strong> C:\WINDOWS\system32\svchost.exe<br>
+                        Process has unusually high registry activity (31133 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> wmiprvse.exe<br>
+                        <strong>Path:</strong> C:\WINDOWS\system32\wbem\wmiprvse.exe<br>
+                        Process has unusually high registry activity (2834 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> CloudEndpointService.exe<br>
+                        <strong>Path:</strong> C:\Program Files\Trend Micro\Cloud Endpoint\CloudEndpointService.exe<br>
+                        Process has unusually high registry activity (317 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> Explorer.EXE<br>
+                        <strong>Path:</strong> C:\WINDOWS\Explorer.EXE<br>
+                        Process has unusually high registry activity (131 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> ctfmon.exe<br>
+                        <strong>Path:</strong> C:\WINDOWS\system32\ctfmon.exe<br>
+                        Process has unusually high registry activity (1795 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> CC_Engine_x64.exe<br>
+                        <strong>Path:</strong> C:\Program Files (x86)\MSI\MSI Center\Engine\CC_Engine_x64.exe<br>
+                        Process has unusually high registry activity (138 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">HIGH_REGISTRY_ACTIVITY</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> NVIDIA Broadcast.exe<br>
+                        <strong>Path:</strong> C:\Program Files\NVIDIA Corporation\NVIDIA Broadcast\NVIDIA Broadcast.exe<br>
+                        Process has unusually high registry activity (101 operations)
+                    </div>
+                    <div class="mitre-tag">🎯 T1547 - Boot or Logon Autostart Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">EXE_IN_TEMP</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> CodeSetup-stable-c9d77990917f3102ada88be140d28b038d1dd7c7.exe<br>
+                        <strong>Path:</strong> C:\Users\adria\AppData\Local\Temp\vscode-stable-user-x64\CodeSetup-stable-c9d779...<br>
+                        Executable running from temporary directory
+                    </div>
+                    <div class="mitre-tag">🎯 T1204 - User Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">EXE_IN_TEMP</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> Procmon.exe<br>
+                        <strong>Path:</strong> C:\Users\adria\Downloads\ProcessMonitor\Procmon.exe<br>
+                        Executable running from temporary directory
+                    </div>
+                    <div class="mitre-tag">🎯 T1204 - User Execution</div>
+                </div>
+                
+                <div class="anomaly-card medium">
+                    <div class="anomaly-header">
+                        <span class="anomaly-type">EXE_IN_TEMP</span>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>Process:</strong> Procmon64.exe<br>
+                        <strong>Path:</strong> C:\Users\adria\AppData\Local\Temp\Procmon64.exe<br>
+                        Executable running from temporary directory
+                    </div>
+                    <div class="mitre-tag">🎯 T1204 - User Execution</div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Process Execution Flow (Mermaid) -->
+        <div class="section">
+            <div class="section-header">
+                📊 Process Activity Flow
+            </div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart LR
+    subgraph Processes
+        svchost_exe["svchost.exe\n31,926 ops"]
+        coreServiceShell_exe["coreServiceShell.exe\n11,648 ops"]
+        wmiprvse_exe["wmiprvse.exe\n3,729 ops"]
+        ctfmon_exe["ctfmon.exe\n1,841 ops"]
+        Code_exe["Code.exe\n1,031 ops"]
+        CloudEndpointService_exe["CloudEndpointService.exe\n755 ops"]
+        dsa_exe["dsa.exe\n385 ops"]
+        Explorer_EXE["Explorer.EXE\n254 ops"]
+    end
+    
+    subgraph Operations
+        REG[("Registry\n15,923")]
+        FILE[("Files\n8,759")]
+        PROC[("Process\n1,034")]
+    end
+    
+    svchost_exe --> REG
+    coreServiceShell_exe --> REG
+    wmiprvse_exe --> REG
+    ctfmon_exe --> REG
+    svchost_exe --> FILE
+    coreServiceShell_exe --> FILE
+    wmiprvse_exe --> FILE
+    ctfmon_exe --> FILE
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Processes Table -->
+        <div class="section">
+            <div class="section-header">
+                🖥️ Impact Scope - Top Processes by Activity
+            </div>
+            <div class="section-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Path</th>
+                            <th>Operations</th>
+                            <th>Files Accessed</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td><strong>svchost.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\WINDOWS\system32\svchost.exe...</td>
+                            <td>31,926</td>
+                            <td>333</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>coreServiceShell.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\Program Files\Trend Micro\AMSP\coreServiceShell...</td>
+                            <td>11,648</td>
+                            <td>241</td>
+                            <td><span style="color: var(--accent-green);">✓ Normal</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>wmiprvse.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\WINDOWS\system32\wbem\wmiprvse.exe...</td>
+                            <td>3,729</td>
+                            <td>1113</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>ctfmon.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\WINDOWS\system32\ctfmon.exe...</td>
+                            <td>1,841</td>
+                            <td>277</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>Code.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\Users\adria\AppData\Local\Programs\Microsoft VS...</td>
+                            <td>1,031</td>
+                            <td>112</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>CloudEndpointService.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\Program Files\Trend Micro\Cloud Endpoint\CloudE...</td>
+                            <td>755</td>
+                            <td>122</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>dsa.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\Program Files\Trend Micro\Deep Security Agent\d...</td>
+                            <td>385</td>
+                            <td>124</td>
+                            <td><span style="color: var(--accent-green);">✓ Normal</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>Explorer.EXE</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\WINDOWS\Explorer.EXE...</td>
+                            <td>254</td>
+                            <td>68</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>services.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\WINDOWS\system32\services.exe...</td>
+                            <td>235</td>
+                            <td>18</td>
+                            <td><span style="color: var(--accent-red);">⚠️ Anomaly</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>NGenuity2Helper.exe</strong></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">C:\Program Files\WindowsApps\33C30B79.HyperXNGenui...</td>
+                            <td>184</td>
+                            <td>73</td>
+                            <td><span style="color: var(--accent-green);">✓ Normal</span></td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Observable Graph Link -->
+        <div class="section">
+            <div class="section-header">
+                🔗 Observable Graph
+            </div>
+            <div class="section-content">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">
+                    Interactive node-link diagram showing process-to-file relationships and anomaly connections.
+                </p>
+                <a href="observable_graph.html" target="_blank" style="
+                    display: inline-block;
+                    background: var(--accent-blue);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-weight: 600;
+                ">Open Interactive Graph →</a>
+            </div>
+        </div>
+        
+        <!-- Operation Breakdown -->
+        <div class="section">
+            <div class="section-header">
+                📈 Operation Breakdown
+            </div>
+            <div class="section-content">
+                <div class="mermaid">
+pie showData
+    title Operations Distribution
+        "RegCloseKey" : 12220
+    "RegOpenKey" : 9751
+    "RegQueryValue" : 6172
+    "ReadFile" : 6091
+    "RegQueryKey" : 5257
+    "RegCreateKey" : 3404
+    "CreateFile" : 2668
+    "CloseFile" : 2368
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#58a6ff',
+                primaryTextColor: '#c9d1d9',
+                primaryBorderColor: '#30363d',
+                lineColor: '#8b949e',
+                secondaryColor: '#21262d',
+                tertiaryColor: '#161b22'
+            }
+        });
+    </script>
+</body>
+</html>
