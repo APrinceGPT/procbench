@@ -304,7 +304,7 @@ See `.env.example` for full list:
 
 ```env
 # Server
-PORT=8080
+PORT=8000
 ENVIRONMENT=development
 
 # AI Configuration (OpenAI-compatible)

@@ -136,6 +136,9 @@ async def analyze_file(
         file_stream = io.BytesIO(content)
         result = analyzer.analyze_stream(file_stream, file.filename)
         
+        # Override the analysis_id to match our cache key
+        result.analysis_id = analysis_id
+        
         # Store result
         _analysis_cache[analysis_id]["status"] = "completed"
         _analysis_cache[analysis_id]["progress"] = 100
@@ -211,13 +214,18 @@ async def get_processes(analysis_id: str, flagged_only: bool = False):
         raise HTTPException(status_code=400, detail="Analysis not completed")
     
     result = cache["result"]
-    processes = result.processes
+    all_processes = result.processes
     
     if flagged_only:
-        processes = [p for p in processes if p.is_flagged]
+        processes = [p for p in all_processes if p.is_flagged]
+    else:
+        processes = all_processes
+    
+    flagged_count = sum(1 for p in all_processes if p.is_flagged)
     
     return {
         "total": len(processes),
+        "flagged": flagged_count,
         "processes": [
             {
                 "pid": p.pid,

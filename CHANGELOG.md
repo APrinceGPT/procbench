@@ -17,6 +17,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-02-01
+
+### Added
+- **Modern UI Design System (Phase 1)**
+  - Centralized design tokens (`design-tokens.ts`) for colors, spacing, typography
+  - Glass morphism CSS utilities (`glass.css`) with backdrop blur effects
+  - New reusable UI components:
+    - `GlassCard` - Elevated glass panels with variants (default/elevated/interactive/subtle)
+    - `Button` - Modern buttons with variants (primary/secondary/ghost/danger) and loading state
+    - `Badge` - Risk level and status indicators with glow effects
+    - `SearchInput` - Search input with icon, clear button, and loading state
+    - `Skeleton` - Loading placeholders with shimmer animation
+  - Gradient accents (blue to purple) for branding
+  - Color-coded risk levels (high=red, medium=orange, low=yellow, success=green)
+
+### Changed
+- **Svelte 5 Migration**
+  - Updated all components to use Svelte 5 runes mode (`$state`, `$derived`, `$props`)
+  - Replaced `$:` reactive statements with `$derived`
+  - Updated event handlers to new syntax (`onclick` instead of `on:click`)
+
+- **UI Modernization**
+  - Redesigned Sidebar with glass morphism and gradient logo
+  - Updated root layout with gradient background
+  - Modernized upload page with glass cards and entrance animations
+  - Enhanced dashboard with animated stats grid and color-coded cards
+  - Improved `RiskGauge` with SVG glow effects and better needle design
+  - Redesigned `FindingCard` and `FindingList` with glass styling and hover animations
+
+### Fixed
+- Tailwind CSS v4 compatibility issues with layout
+- API port mismatch between frontend and backend (now 8000)
+- Analysis ID cache synchronization issues
+- ARIA role warnings for interactive elements
+
+---
+
 ## [1.0.0] - TBD
 
 ### Added
@@ -62,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Contextual tooltips
 
 - **Technical**
-  - Go backend with REST API
+  - Python/FastAPI backend with REST API
   - Svelte frontend
   - Configurable AI rate limiting
   - Docker containerization

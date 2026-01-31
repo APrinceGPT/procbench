@@ -3,8 +3,9 @@
 > **"Turn Process Noise into Threat Signal"**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org)
-[![Svelte](https://img.shields.io/badge/Svelte-4.0+-FF3E00?logo=svelte)](https://svelte.dev)
+[![Python Version](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python)](https://python.org)
+[![Svelte](https://img.shields.io/badge/Svelte-5.0+-FF3E00?logo=svelte)](https://svelte.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0+-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
 
 ---
 
@@ -26,10 +27,10 @@
 ### Using Docker (Recommended)
 
 ```bash
-docker run -p 8080:8080 ghcr.io/yourusername/procbench:latest
+docker run -p 8000:8000 ghcr.io/yourusername/procbench:latest
 ```
 
-Open http://localhost:8080 in your browser.
+Open http://localhost:8000 in your browser.
 
 ### From Source
 
@@ -40,8 +41,8 @@ cd procbench
 
 # Backend
 cd backend
-go mod download
-go run cmd/procbench/main.go
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
 
 # Frontend (separate terminal)
 cd frontend
@@ -64,6 +65,40 @@ npm run dev
 
 ### PDF Export
 *Print-ready analysis report*
+
+---
+
+## ✨ Modern UI Design System
+
+ProcBench features a modern glass morphism design with:
+
+### Design Tokens
+- **Centralized theming** via TypeScript design tokens
+- **Consistent color palette** with risk-level coding (red/orange/yellow/green)
+- **Gradient accents** (blue to purple) for branding
+- **Glass morphism surfaces** with backdrop blur effects
+
+### UI Components
+| Component | Description |
+|-----------|-------------|
+| `GlassCard` | Elevated glass panels with hover states |
+| `Button` | Primary/secondary/ghost/danger variants with loading state |
+| `Badge` | Risk level and status indicators |
+| `SearchInput` | Modern search with icon and clear button |
+| `Skeleton` | Loading placeholders with shimmer animation |
+| `RiskGauge` | SVG semicircular gauge with glow effects |
+
+### Animations
+- **Entrance animations** with staggered delays
+- **Hover interactions** with scale/translate transforms
+- **Glow effects** on focus and hover
+- **Smooth transitions** (150-300ms)
+
+### Tech Stack
+- **Svelte 5** with runes mode (`$state`, `$derived`, `$props`)
+- **SvelteKit 2** for routing and SSR
+- **Tailwind CSS 4** for utility classes
+- **TypeScript** for type safety
 
 ---
 
@@ -163,7 +198,7 @@ AI_MODEL=gpt-4
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Server port | `8080` |
+| `PORT` | Server port | `8000` |
 | `MAX_FILE_SIZE_MB` | Maximum upload size | `500` |
 | `AI_PROVIDER` | AI provider type | `openai` |
 | `AI_BASE_URL` | AI API endpoint | - |
@@ -179,16 +214,34 @@ See [`.env.example`](.env.example) for full configuration.
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Svelte UI     │────▶│   Go Backend    │────▶│    AI API       │
-│   (Browser)     │     │   (REST API)    │     │   (External)    │
+│   Svelte 5 UI   │────▶│ Python Backend  │────▶│    AI API       │
+│   (Browser)     │     │    (FastAPI)    │     │   (External)    │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-                               │
-                    ┌──────────┴──────────┐
-                    │                     │
-              ┌─────────────┐      ┌─────────────┐
-              │   Parser    │      │  Detection  │
-              │ (PML/CSV/XML)│     │   Engine    │
-              └─────────────┘      └─────────────┘
+        │                       │
+        │                ┌──────┴──────┐
+   Glass Design          │             │
+   System (CSS)    ┌─────────┐   ┌─────────┐
+                   │ Parser  │   │Detection│
+                   │PML/CSV  │   │ Engine  │
+                   └─────────┘   └─────────┘
+```
+
+### Frontend Structure
+```
+frontend/src/
+├── lib/
+│   ├── styles/
+│   │   ├── design-tokens.ts   # Centralized design values
+│   │   └── glass.css          # Glass morphism utilities
+│   ├── components/
+│   │   ├── ui/                # Reusable UI components
+│   │   ├── findings/          # Finding cards and lists
+│   │   ├── navigation/        # Sidebar, TopNav
+│   │   ├── upload/            # File upload dropzone
+│   │   └── visualization/     # RiskGauge, charts
+│   ├── stores/                # Svelte stores
+│   └── api/                   # API client
+└── routes/                    # SvelteKit pages
 ```
 
 ---
@@ -198,7 +251,7 @@ See [`.env.example`](.env.example) for full configuration.
 ```bash
 # Backend tests
 cd backend
-make test
+pytest
 
 # Frontend tests
 cd frontend

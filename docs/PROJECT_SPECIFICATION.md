@@ -92,10 +92,10 @@ ProcBench automates the analysis of Process Monitor logs by:
 | Component | Technology | Justification |
 |-----------|------------|---------------|
 | **Frontend** | Svelte | Modern, fast, excellent DX |
-| **Backend** | Go | Performance, concurrency, single binary |
+| **Backend** | Python (FastAPI) | High performance, async support, type safety |
 | **AI Integration** | OpenAI-compatible API | Flexible, supports multiple providers |
 | **Visualization** | D3.js / Chart.js | Interactive, modern charts |
-| **PDF Export** | Go PDF library | Server-side PDF generation |
+| **PDF Export** | ReportLab | Server-side PDF generation |
 | **Containerization** | Docker | Consistent deployment |
 
 ### 2.3 Core Workflow
@@ -139,7 +139,7 @@ ProcBench automates the analysis of Process Monitor logs by:
                                  │ HTTPS
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Go Backend Server                              │
+│                        Python Backend Server (FastAPI)                   │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
 │  │                         API Layer (REST)                         │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
@@ -172,22 +172,25 @@ ProcBench automates the analysis of Process Monitor logs by:
 | **Output** | Normalized event structure |
 
 **Parsed Event Structure:**
-```go
-type ProcessEvent struct {
-    Timestamp     int64             `json:"timestamp"`
-    ProcessName   string            `json:"process_name"`
-    ProcessPath   string            `json:"process_path"`
-    PID           int               `json:"pid"`
-    TID           int               `json:"tid"`
-    Operation     string            `json:"operation"`
-    Path          string            `json:"path"`
-    Result        string            `json:"result"`
-    Duration      int64             `json:"duration"`
-    EventClass    string            `json:"event_class"`
-    Details       map[string]string `json:"details"`
-    HasStackTrace bool              `json:"has_stack_trace"`
-    StackTrace    []uint64          `json:"stack_trace,omitempty"`
-}
+```python
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
+class ProcessEvent(BaseModel):
+    timestamp: datetime
+    process_name: str
+    process_path: str
+    pid: int
+    tid: int
+    operation: str
+    path: str
+    result: str
+    duration: int
+    event_class: str
+    details: dict[str, str]
+    has_stack_trace: bool = False
+    stack_trace: Optional[list[int]] = None
 ```
 
 #### 3.2.2 Detection Engine
@@ -725,7 +728,7 @@ Always respond in the specified JSON format.
 
 | Format | Max Size | Parser |
 |--------|----------|--------|
-| PML (native) | 500 MB | Go PML parser |
+| PML (native) | 500 MB | Python PML parser (procmon-parser) |
 | CSV | 500 MB | Standard CSV |
 | XML | 500 MB | XML parser |
 
@@ -824,8 +827,8 @@ Upload → Parse → Analyze → Display → Export → Delete
 
 | Category | Coverage | Tools |
 |----------|----------|-------|
-| **Unit Tests** | 80%+ | Go testing, Jest |
-| **Integration Tests** | API endpoints | Go testing |
+| **Unit Tests** | 80%+ | pytest, Jest |
+| **Integration Tests** | API endpoints | pytest |
 | **E2E Tests** | User workflows | Playwright |
 | **Performance Tests** | Large file handling | Custom benchmarks |
 | **Security Tests** | File upload, injection | OWASP ZAP |
@@ -861,28 +864,29 @@ stages:
 
 ```dockerfile
 # Multi-stage build
-FROM golang:1.21 AS backend
+FROM python:3.10-slim AS backend
 WORKDIR /app
 COPY backend/ .
-RUN go build -o procbench
+RUN pip install --no-cache-dir -r requirements.txt
 
 FROM node:20 AS frontend
 WORKDIR /app
 COPY frontend/ .
 RUN npm ci && npm run build
 
-FROM alpine:latest
-COPY --from=backend /app/procbench /app/
+FROM python:3.10-slim
+WORKDIR /app
+COPY --from=backend /app /app/
 COPY --from=frontend /app/build /app/static/
-EXPOSE 8080
-CMD ["/app/procbench"]
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### 11.2 Environment Configuration
 
 ```env
 # Server
-PORT=8080
+PORT=8000
 HOST=0.0.0.0
 ENVIRONMENT=production
 
