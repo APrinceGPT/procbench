@@ -99,6 +99,32 @@ ProcBench features a modern glass morphism design with:
 - **SvelteKit 2** for routing and SSR
 - **Tailwind CSS 4** for utility classes
 - **TypeScript** for type safety
+- **vis-network** for process graph visualization
+- **Chart.js** for timeline charts
+
+---
+
+## 📊 Interactive Visualizations
+
+### Process Graph (vis-network)
+- **Network Layout** - Force-directed physics simulation
+- **Node Sizing** - Scales with event count and risk score
+- **Color Coding** - Red (high risk), orange (medium), yellow (low), gray (safe)
+- **Interactive Controls** - Zoom, pan, fit-to-screen, toggle physics
+- **Search & Filter** - Find processes, filter by risk level
+- **Click-to-Select** - View process details in side panel
+
+### Timeline Chart (Chart.js)
+- **Bar Chart View** - Visual risk score comparison over time
+- **Dual View Mode** - Toggle between chart and list views
+- **Anomaly Highlighting** - Special styling for anomalous events
+- **Event Selection** - Click bars to view event details
+- **Statistics Header** - Event count, anomaly count, high-risk count
+
+### Details Panels
+- **Process Details** - PID, image path, legitimacy, behavior tags
+- **Timeline Entry** - Timestamp, description, anomaly indicator
+- **Quick Actions** - View full details, copy information
 
 ---
 

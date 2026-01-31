@@ -17,6 +17,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-02-01
+
+### Added
+- **Interactive Visualizations (Phase 2)**
+  - **vis-network Process Graph**
+    - Interactive network graph visualization of process relationships
+    - Zoom, pan, and physics-based layout
+    - Click-to-select nodes for details
+    - Search and filter controls (All / Flagged / High Risk)
+    - Node size scales with event count and risk score
+    - Color-coded nodes by risk level (high=red, medium=orange, low=yellow)
+    - Legend and node/edge count statistics
+  - **Process Details Panel**
+    - Slide-out panel showing selected process details
+    - Risk score display with color-coded badge
+    - Legitimacy indicator (legitimate/suspicious/malicious)
+    - Image path and event count information
+    - Behavior tags display
+    - Quick action buttons (View Details, Copy Info)
+  - **Chart.js Timeline Visualization**
+    - Bar chart showing risk scores over time
+    - Click-to-select events for details
+    - Tooltips with process name, PID, and description
+    - Color-coded bars by risk level
+    - Responsive design with proper legends
+  - **Timeline Entry Card**
+    - Details card for selected timeline events
+    - Anomaly indicator badge
+    - Timestamp display
+    - Event description
+
+### Changed
+- **Process Tree Page** (`/investigate/tree`)
+  - Complete redesign with graph + details panel layout
+  - Replaced text-based tree with vis-network graph
+  - Added collapsible details panel
+  - Modern page header with icon
+  - Loading, error, and empty state handling
+
+- **Timeline Page** (`/investigate/timeline`)
+  - Complete redesign with chart + list dual view
+  - Added view mode toggle (Chart / List)
+  - Statistics header (Events, Anomalies, High Risk counts)
+  - Filter controls bar
+  - Chart.js bar chart for visual analysis
+  - Redesigned list view with timeline styling
+  - Entry details card panel
+
+### Technical
+- Added `graph-utils.ts` for vis-network data transformation
+- Added Chart.js as dependency for timeline charts
+- Copied vis-network library to static folder for browser access
+- All components follow Svelte 5 runes pattern
+- Fully typed with TypeScript
+
+---
+
 ## [1.1.0] - 2026-02-01
 
 ### Added
