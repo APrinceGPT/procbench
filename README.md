@@ -17,7 +17,10 @@
 - 🤖 **AI-Powered Legitimacy Assessment** - Every process analyzed and scored
 - 🏷️ **Behavioral Tagging** - Automatic tagging with MITRE ATT&CK mapping
 - 📊 **Interactive Visualizations** - Timelines, treemaps, and heatmaps
-- 📋 **Guided Investigation** - Step-by-step workflow for all skill levels
+- � **Global Search** - Find processes instantly with keyboard navigation
+- 🗺️ **Path Heatmap** - Visual treemap of file/registry access patterns
+- 📈 **Activity Charts** - Time-based activity statistics and risk distribution
+- �📋 **Guided Investigation** - Step-by-step workflow for all skill levels
 - 📄 **PDF Reports** - Export findings for documentation
 
 ---
@@ -87,6 +90,10 @@ ProcBench features a modern glass morphism design with:
 | `SearchInput` | Modern search with icon and clear button |
 | `Skeleton` | Loading placeholders with shimmer animation |
 | `RiskGauge` | SVG semicircular gauge with glow effects |
+| `GlobalSearch` | Command palette-style search with keyboard navigation |
+| `ActivityChart` | Time-based activity statistics (Chart.js) |
+| `RiskDistributionChart` | Risk level breakdown visualization |
+| `TreemapHeatmap` | Interactive path access frequency heatmap |
 
 ### Animations
 - **Entrance animations** with staggered delays
@@ -120,6 +127,26 @@ ProcBench features a modern glass morphism design with:
 - **Anomaly Highlighting** - Special styling for anomalous events
 - **Event Selection** - Click bars to view event details
 - **Statistics Header** - Event count, anomaly count, high-risk count
+
+### Activity Statistics (Chart.js)
+- **Activity Over Time** - Line chart showing process activity patterns
+- **Risk Distribution** - Doughnut chart with risk level breakdown
+- **Interactive Tooltips** - Hover for detailed statistics
+- **Responsive Design** - Adapts to container size
+
+### Path Heatmap (Treemap)
+- **Hierarchical Treemap** - Visual representation of file/registry access
+- **Color Coding** - Registry (purple), System (blue), User (green)
+- **Access Frequency** - Size proportional to access count
+- **Click-to-Expand** - View operation breakdown and processes
+- **Smart Grouping** - Directory-level aggregation
+
+### Global Search
+- **Command Palette Style** - Ctrl+K or / to activate
+- **Multi-field Search** - Search by name, PID, path, tags, reasoning
+- **Keyboard Navigation** - Arrow keys + Enter to select
+- **Result Highlighting** - Matched text highlighted
+- **Risk Indicators** - Color-coded risk badges
 
 ### Details Panels
 - **Process Details** - PID, image path, legitimacy, behavior tags
@@ -264,7 +291,8 @@ frontend/src/
 │   │   ├── findings/          # Finding cards and lists
 │   │   ├── navigation/        # Sidebar, TopNav
 │   │   ├── upload/            # File upload dropzone
-│   │   └── visualization/     # RiskGauge, charts
+│   │   ├── search/            # GlobalSearch component
+│   │   └── visualization/     # RiskGauge, ActivityChart, TreemapHeatmap
 │   ├── stores/                # Svelte stores
 │   └── api/                   # API client
 └── routes/                    # SvelteKit pages

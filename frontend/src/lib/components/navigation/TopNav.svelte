@@ -1,10 +1,20 @@
 <script lang="ts">
   import { uiStore } from '$lib/stores/ui';
-  import { hasAnalysis } from '$lib/stores/analysis';
+  import { hasAnalysis, analysisResult } from '$lib/stores/analysis';
+  import GlobalSearch from '$lib/components/search/GlobalSearch.svelte';
+  import type { ProcessSummary } from '$lib/api/types';
 
-  export let title: string = 'ProcBench';
+  interface Props {
+    title?: string;
+    onProcessSelect?: (process: ProcessSummary) => void;
+  }
 
-  $: sidebarOpen = $uiStore.sidebarOpen;
+  let { title = 'ProcBench', onProcessSelect }: Props = $props();
+
+  // Handle process selection from search
+  function handleProcessSelect(process: ProcessSummary) {
+    onProcessSelect?.(process);
+  }
 </script>
 
 <header
@@ -14,7 +24,7 @@
     <div class="flex items-center gap-4">
       <button
         class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        on:click={() => uiStore.toggleSidebar()}
+        onclick={() => uiStore.toggleSidebar()}
         aria-label="Toggle sidebar"
       >
         <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,6 +50,13 @@
       </div>
     </div>
 
+    <!-- Global Search -->
+    {#if $hasAnalysis}
+      <div class="flex-1 max-w-md mx-4">
+        <GlobalSearch onSelect={handleProcessSelect} placeholder="Search processes, PIDs, behaviors..." />
+      </div>
+    {/if}
+
     <div class="flex items-center gap-4">
       {#if $hasAnalysis}
         <span
@@ -52,7 +69,7 @@
 
       <button
         class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        on:click={() => uiStore.setTheme($uiStore.theme === 'dark' ? 'light' : 'dark')}
+        onclick={() => uiStore.setTheme($uiStore.theme === 'dark' ? 'light' : 'dark')}
         aria-label="Toggle theme"
       >
         {#if $uiStore.theme === 'dark'}
@@ -70,7 +87,8 @@
         {/if}
       </button>
 
-      <button
+      <a
+        href="/help"
         class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         aria-label="Help"
       >
@@ -87,7 +105,7 @@
             d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-      </button>
+      </a>
     </div>
   </div>
 </header>

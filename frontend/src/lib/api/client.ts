@@ -8,6 +8,7 @@ import type {
   ProcessesResponse,
   ProcessTreeNode,
   TimelineResponse,
+  PathHeatmapResponse,
 } from './types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -140,6 +141,25 @@ export class ApiClient {
     }
 
     return response.blob();
+  }
+
+  /**
+   * Get path heatmap data from an analysis
+   */
+  async getPathHeatmap(
+    analysisId: string,
+    options: { limit?: number; minAccessCount?: number } = {}
+  ): Promise<PathHeatmapResponse> {
+    const params = new URLSearchParams();
+    if (options.limit !== undefined) {
+      params.set('limit', options.limit.toString());
+    }
+    if (options.minAccessCount !== undefined) {
+      params.set('min_access_count', options.minAccessCount.toString());
+    }
+
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return fetchApi<PathHeatmapResponse>(`/analysis/${analysisId}/path-heatmap${query}`);
   }
 
   /**

@@ -84,6 +84,20 @@ export interface ProcessesResponse {
   processes: ProcessSummary[];
 }
 
+export interface PathHeatmapEntry {
+  path: string;
+  access_count: number;
+  operation_types: Record<string, number>;
+  processes: string[];
+}
+
+export interface PathHeatmapResponse {
+  total_paths: number;
+  returned_paths: number;
+  total_accesses: number;
+  heatmap: PathHeatmapEntry[];
+}
+
 // Risk level helpers
 export type RiskLevel = 'high' | 'medium' | 'low' | 'none';
 

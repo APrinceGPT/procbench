@@ -3,7 +3,9 @@ Main analyzer - orchestrates parsing, detection, and AI analysis.
 """
 
 import logging
+import os
 import time
+from collections import defaultdict
 from pathlib import Path
 from typing import BinaryIO
 from uuid import uuid4
@@ -11,8 +13,10 @@ from uuid import uuid4
 from app.config import settings
 from app.models import (
     ParsedLogFile,
+    ProcessEvent,
     ProcessInfo,
     ProcessTreeNode,
+    PathHeatmapEntry,
     AnalysisResult,
     FindingSummary,
 )
@@ -94,6 +98,74 @@ class Analyzer:
         
         return result
     
+    def _aggregate_path_heatmap(
+        self, 
+        events: list[ProcessEvent], 
+        top_n: int = 50
+    ) -> list[PathHeatmapEntry]:
+        """
+        Aggregate path access data from events for heatmap visualization.
+        
+        Args:
+            events: List of process events
+            top_n: Number of top paths to return
+            
+        Returns:
+            List of PathHeatmapEntry sorted by access count
+        """
+        # Track access data per normalized path (directory level)
+        path_data: dict[str, dict] = defaultdict(lambda: {
+            "access_count": 0,
+            "operation_types": defaultdict(int),
+            "processes": set()
+        })
+        
+        for event in events:
+            if not event.path:
+                continue
+                
+            # Normalize path to directory level for better aggregation
+            # For files, get the parent directory; for directories, use as-is
+            try:
+                path = event.path.strip()
+                if not path:
+                    continue
+                    
+                # Handle registry paths
+                if path.startswith("HK") or path.startswith("\\REGISTRY"):
+                    # For registry, use the key path (up to 3 levels deep for grouping)
+                    parts = path.replace("\\", "/").split("/")
+                    normalized = "/".join(parts[:min(4, len(parts))])
+                else:
+                    # For file paths, use parent directory
+                    normalized = os.path.dirname(path) or path
+                    
+                if not normalized:
+                    continue
+                    
+                path_data[normalized]["access_count"] += 1
+                path_data[normalized]["operation_types"][event.operation.value] += 1
+                if event.process_name:
+                    path_data[normalized]["processes"].add(event.process_name)
+                    
+            except Exception:
+                # Skip malformed paths
+                continue
+        
+        # Convert to PathHeatmapEntry objects
+        entries = []
+        for path, data in path_data.items():
+            entries.append(PathHeatmapEntry(
+                path=path,
+                access_count=data["access_count"],
+                operation_types=dict(data["operation_types"]),
+                processes=list(data["processes"])[:10]  # Limit process list
+            ))
+        
+        # Sort by access count and return top N
+        entries.sort(key=lambda x: x.access_count, reverse=True)
+        return entries[:top_n]
+    
     def _run_analysis(
         self,
         analysis_id: str,
@@ -125,7 +197,12 @@ class Analyzer:
         logger.info("Building process tree...")
         process_tree = build_process_tree(processes)
         
-        # Step 4: Calculate summary statistics
+        # Step 4: Aggregate path heatmap data
+        logger.info("Aggregating path access data...")
+        path_heatmap = self._aggregate_path_heatmap(parsed.events)
+        logger.info(f"Aggregated {len(path_heatmap)} path entries for heatmap")
+        
+        # Step 5: Calculate summary statistics
         high_risk = sum(1 for p in processes if p.risk_score >= 70)
         medium_risk = sum(1 for p in processes if 30 <= p.risk_score < 70)
         low_risk = sum(1 for p in processes if p.risk_score < 30)
@@ -155,6 +232,7 @@ class Analyzer:
             high_risk_count=high_risk,
             medium_risk_count=medium_risk,
             low_risk_count=low_risk,
+            path_heatmap=path_heatmap,
             top_threats=top_threats,
         )
 

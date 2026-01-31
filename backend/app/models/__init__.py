@@ -6,6 +6,7 @@ from .event import ProcessEvent, ParsedLogFile, OperationType
 from .process import (
     ProcessInfo,
     ProcessTreeNode,
+    PathHeatmapEntry,
     AnalysisResult,
     LegitimacyStatus,
     BehaviorTag,
@@ -21,6 +22,7 @@ __all__ = [
     # Process models
     "ProcessInfo",
     "ProcessTreeNode",
+    "PathHeatmapEntry",
     "AnalysisResult",
     "LegitimacyStatus",
     "BehaviorTag",

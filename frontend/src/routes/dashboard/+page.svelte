@@ -3,17 +3,43 @@
 	import { goto } from '$app/navigation';
 	import { analysisResult, hasAnalysis, topThreats } from '$lib/stores/analysis';
 	import { api } from '$lib/api/client';
+	import type { PathHeatmapEntry } from '$lib/api/types';
 	import RiskGauge from '$lib/components/visualization/RiskGauge.svelte';
+	import ActivityChart from '$lib/components/visualization/ActivityChart.svelte';
+	import RiskDistributionChart from '$lib/components/visualization/RiskDistributionChart.svelte';
+	import TreemapHeatmap from '$lib/components/visualization/TreemapHeatmap.svelte';
 	import FindingList from '$lib/components/findings/FindingList.svelte';
 	import { GlassCard, Button } from '$lib/components/ui';
 	import { colors, spacing, borders, animation, shadows } from '$lib/styles/design-tokens';
 
 	let downloading = $state(false);
+	
+	// Path heatmap data
+	let pathHeatmapData = $state<PathHeatmapEntry[]>([]);
+	let pathHeatmapTotalAccesses = $state(0);
+	let pathHeatmapLoading = $state(false);
+	let pathHeatmapError = $state<string | null>(null);
 
-	// Redirect if no analysis
-	onMount(() => {
+	// Redirect if no analysis, otherwise load heatmap data
+	onMount(async () => {
 		if (!$hasAnalysis) {
 			goto('/');
+			return;
+		}
+		
+		// Load path heatmap data
+		if ($analysisResult) {
+			pathHeatmapLoading = true;
+			try {
+				const response = await api.getPathHeatmap($analysisResult.analysis_id, { limit: 50 });
+				pathHeatmapData = response.heatmap;
+				pathHeatmapTotalAccesses = response.total_accesses;
+			} catch (e) {
+				console.error('Failed to load path heatmap:', e);
+				pathHeatmapError = e instanceof Error ? e.message : 'Failed to load path data';
+			} finally {
+				pathHeatmapLoading = false;
+			}
 		}
 	});
 
@@ -225,6 +251,102 @@
 					maxItems={5}
 					compact
 				/>
+			</GlassCard>
+		</div>
+
+		<!-- Analysis Charts Section -->
+		<div style="margin-top: {spacing.xl}; display: grid; grid-template-columns: 1fr 1fr; gap: {spacing.lg};">
+			<!-- Activity Distribution -->
+			<GlassCard variant="elevated">
+				<h2 style="
+					font-size: 1rem;
+					font-weight: 600;
+					color: {colors.text.primary};
+					margin: 0 0 {spacing.lg} 0;
+					display: flex;
+					align-items: center;
+					gap: {spacing.sm};
+				">
+					<svg style="width: 18px; height: 18px; color: {colors.accent.primary};" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+					</svg>
+					Activity Distribution
+				</h2>
+				<div style="height: 280px;">
+					<ActivityChart processes={$topThreats} />
+				</div>
+			</GlassCard>
+			
+			<!-- Risk Distribution -->
+			<GlassCard variant="elevated">
+				<h2 style="
+					font-size: 1rem;
+					font-weight: 600;
+					color: {colors.text.primary};
+					margin: 0 0 {spacing.lg} 0;
+					display: flex;
+					align-items: center;
+					gap: {spacing.sm};
+				">
+					<svg style="width: 18px; height: 18px; color: {colors.risk.high};" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+					</svg>
+					Risk Distribution
+				</h2>
+				<div style="height: 280px;">
+					{#if $analysisResult}
+						<RiskDistributionChart result={$analysisResult} />
+					{/if}
+				</div>
+			</GlassCard>
+		</div>
+
+		<!-- Path Heatmap Section -->
+		<div style="margin-top: {spacing.xl};">
+			<GlassCard variant="elevated">
+				<h2 style="
+					font-size: 1rem;
+					font-weight: 600;
+					color: {colors.text.primary};
+					margin: 0 0 {spacing.lg} 0;
+					display: flex;
+					align-items: center;
+					gap: {spacing.sm};
+				">
+					<svg style="width: 18px; height: 18px; color: {colors.accent.secondary};" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+					</svg>
+					Path Access Heatmap
+				</h2>
+				{#if pathHeatmapLoading}
+					<div style="display: flex; align-items: center; justify-content: center; height: 200px;">
+						<div style="
+							width: 32px;
+							height: 32px;
+							border: 3px solid {colors.glass.border};
+							border-top-color: {colors.accent.primary};
+							border-radius: 50%;
+							animation: spin 1s linear infinite;
+						"></div>
+					</div>
+				{:else if pathHeatmapError}
+					<div style="
+						padding: {spacing.lg};
+						text-align: center;
+						color: {colors.text.tertiary};
+						background: {colors.glass.background};
+						border-radius: {borders.radius.lg};
+					">
+						<p style="margin: 0;">{pathHeatmapError}</p>
+					</div>
+				{:else}
+					<TreemapHeatmap 
+						data={pathHeatmapData} 
+						totalAccesses={pathHeatmapTotalAccesses}
+						maxItems={30}
+					/>
+				{/if}
 			</GlassCard>
 		</div>
 

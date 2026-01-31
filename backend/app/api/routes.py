@@ -303,6 +303,56 @@ async def get_timeline(analysis_id: str, anomalies_only: bool = True, limit: int
     }
 
 
+@router.get("/analysis/{analysis_id}/path-heatmap")
+async def get_path_heatmap(
+    analysis_id: str, 
+    limit: int = 50,
+    min_access_count: int = 1
+):
+    """
+    Get path heatmap data showing file/registry access frequency.
+    
+    Args:
+        analysis_id: Analysis ID
+        limit: Maximum number of paths to return (default 50)
+        min_access_count: Minimum access count to include (default 1)
+        
+    Returns:
+        Path heatmap data for visualization
+    """
+    if analysis_id not in _analysis_cache:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    cache = _analysis_cache[analysis_id]
+    
+    if cache["status"] != "completed":
+        raise HTTPException(status_code=400, detail="Analysis not completed")
+    
+    result = cache["result"]
+    
+    # Filter and limit the path heatmap data
+    heatmap_data = [
+        {
+            "path": entry.path,
+            "access_count": entry.access_count,
+            "operation_types": entry.operation_types,
+            "processes": entry.processes,
+        }
+        for entry in result.path_heatmap
+        if entry.access_count >= min_access_count
+    ][:limit]
+    
+    # Calculate total accesses for percentage calculation
+    total_accesses = sum(entry["access_count"] for entry in heatmap_data)
+    
+    return {
+        "total_paths": len(result.path_heatmap),
+        "returned_paths": len(heatmap_data),
+        "total_accesses": total_accesses,
+        "heatmap": heatmap_data
+    }
+
+
 @router.delete("/analysis/{analysis_id}")
 async def delete_analysis(analysis_id: str):
     """Delete an analysis result."""
