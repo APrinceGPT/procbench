@@ -23,7 +23,7 @@
   // ==========================================================================
 
   let canvasRef: HTMLCanvasElement | null = $state(null);
-  let chart: Chart | null = $state(null);
+  let chart: Chart | null = null; // Not reactive - managed manually
   let selectedIndex: number | null = $state(null);
 
   // ==========================================================================
@@ -250,15 +250,15 @@
   // EFFECTS
   // ==========================================================================
 
+  // Track data changes and re-render chart
   $effect(() => {
-    if (entries && canvasRef) {
-      initChart();
-    }
-  });
-
-  onMount(() => {
-    if (canvasRef && entries.length > 0) {
-      initChart();
+    // Read reactive dependencies
+    const data = entries;
+    const canvas = canvasRef;
+    
+    if (canvas && data.length > 0) {
+      // Use setTimeout to break out of the reactive context
+      setTimeout(() => initChart(), 0);
     }
   });
 
